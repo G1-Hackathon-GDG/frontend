@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getMe } from "../api/authApi";
+// import { getMe } from "../api/authApi";
 
 const AuthContext = createContext();
 
@@ -10,20 +10,37 @@ export const AuthProvider = ({ children }) => {
   const login = (data) => setUser(data);
   const logout = () => setUser(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await getMe();
-        setUser(res.data);
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, []);
+//   useEffect(() => {
+//     const fetchUser = async () => {
+//       try {
+//         const res = await getMe();
+//         setUser(res.data);
+//       } catch {
+//         setUser(null);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     fetchUser();
+//   }, []);
 
+useEffect(() => {
+  // TEMP MOCK USER (until backend is ready)
+ const login = (role = "driver") => {
+  const mockUser = {
+    name: "Test User",
+    role,
+  };
+  setUser(mockUser);
+};
+
+const logout = () => {
+  setUser(null);
+};
+
+  setUser(login("driver")); // Change role to "admin" or "staff" to test different dashboards
+  setLoading(false);
+}, []);
   return (
     <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}

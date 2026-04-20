@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/common/Navbar";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import HomePage from "./pages/HomePage";
 
 const Login = () => <div>Login</div>;
 const Driver = () => <div>Driver</div>;
@@ -12,6 +13,7 @@ function App() {
     <>
       <Navbar />
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
 
         <Route
