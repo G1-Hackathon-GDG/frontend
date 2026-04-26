@@ -1,3 +1,3 @@
-import { useAuthContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
-export const useAuth = () => useAuthContext();
+export default useAuth;
