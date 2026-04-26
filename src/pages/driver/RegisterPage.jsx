@@ -1,10 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
     name: "",
+    email: "",
+    password: "",
     phone: "",
     plate: "",
     vehicleType: "",
@@ -13,6 +15,8 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const navigate = useNavigate();
+
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -20,12 +24,24 @@ export default function RegisterPage() {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:5000/api/auth/register", form);
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/register",
+        form
+      );
 
-      setSuccess("Registered successfully!");
+      setSuccess(res.data?.message || "Registered successfully!");
       setError("");
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1200);
+
     } catch (err) {
-      setError(err.response?.data?.message || "Fraud or invalid data");
+      setError(
+        err.response?.data?.message ||
+        err.message ||
+        "Registration failed"
+      );
       setSuccess("");
     }
   };
@@ -38,6 +54,7 @@ export default function RegisterPage() {
         <h2 className="text-2xl font-bold text-center text-blue-900 mb-2">
           Driver Registration
         </h2>
+
         <p className="text-center text-gray-500 mb-6">
           Create your FuelPass account
         </p>
@@ -56,72 +73,71 @@ export default function RegisterPage() {
 
         <form onSubmit={handleRegister} className="space-y-4">
 
-          <div>
-            <label className="text-sm text-gray-600">Full Name</label>
-            <input
-              name="name"
-              placeholder="Enter full name"
-              onChange={handleChange}
-              className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
-            />
-          </div>
+          <input
+            name="name"
+            placeholder="Full Name"
+            onChange={handleChange}
+            className="w-full p-3 border rounded-lg"
+          />
 
-          <div>
-            <label className="text-sm text-gray-600">Phone</label>
-            <input
-              name="phone"
-              placeholder="Enter phone number"
-              onChange={handleChange}
-              className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
-            />
-          </div>
+          <input
+            name="email"
+            placeholder="Email"
+            onChange={handleChange}
+            className="w-full p-3 border rounded-lg"
+          />
 
-          <div>
-            <label className="text-sm text-gray-600">License Plate</label>
-            <input
-              name="plate"
-              placeholder="Enter plate number"
-              onChange={handleChange}
-              className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
-            />
-          </div>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            onChange={handleChange}
+            className="w-full p-3 border rounded-lg"
+          />
 
-          <div>
-            <label className="text-sm text-gray-600">Vehicle Type</label>
-            <select
-              name="vehicleType"
-              onChange={handleChange}
-              className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
-            >
-              <option value="">Select Vehicle Type</option>
-              <option>Private Car</option>
-              <option>Taxi</option>
-              <option>Bus</option>
-              <option>Truck</option>
-              <option>Motorcycle</option>
-              <option>Government</option>
-              <option>Emergency</option>
-              <option>Other</option>
-            </select>
-          </div>
+          <input
+            name="phone"
+            placeholder="Phone"
+            onChange={handleChange}
+            className="w-full p-3 border rounded-lg"
+          />
+
+          <input
+            name="plate"
+            placeholder="Plate Number"
+            onChange={handleChange}
+            className="w-full p-3 border rounded-lg"
+          />
+
+          <select
+            name="vehicleType"
+            onChange={handleChange}
+            className="w-full p-3 border rounded-lg"
+          >
+            <option value="">Vehicle Type</option>
+            <option>Private Car</option>
+            <option>Taxi</option>
+            <option>Bus</option>
+            <option>Truck</option>
+            <option>Motorcycle</option>
+            <option>Government</option>
+            <option>Emergency</option>
+            <option>Other</option>
+          </select>
 
           <button
             type="submit"
-            className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition"
+            className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold"
           >
             Register
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Already have an account?{" "}
-          <Link to="/login" className="text-blue-900 font-semibold hover:underline">
+        <p className="text-center mt-4 text-sm">
+          Already have account?{" "}
+          <Link to="/login" className="text-blue-900 font-semibold">
             Login
           </Link>
-        </p>
-
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Join FuelPass system for fair fuel distribution
         </p>
 
       </div>
