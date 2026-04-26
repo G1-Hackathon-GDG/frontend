@@ -7,28 +7,40 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { setToken, setUser } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password,
+      });
 
-      setToken(res.data.token);
-      setUser(res.data.user);
+      const { token, user } = res.data;
 
-      navigate("/driver/dashboard");
+      setToken(token);
+      setUser(user);
+
+      if (user.role === "driver") {
+        navigate("/driver/dashboard");
+      } else if (user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else if (user.role === "staff") {
+        navigate("/station/scanner");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -37,10 +49,10 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border-t-4 border-blue-900">
 
-        {/* Title */}
         <h2 className="text-2xl font-bold text-center text-blue-900 mb-2">
           FuelPass Login
         </h2>
+
         <p className="text-center text-gray-500 mb-6">
           Driver access portal
         </p>
@@ -59,6 +71,7 @@ export default function LoginPage() {
               className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
               type="email"
               placeholder="Enter your email"
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
@@ -69,15 +82,17 @@ export default function LoginPage() {
               className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
               type="password"
               placeholder="Enter your password"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition"
+            disabled={loading}
+            className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:opacity-50"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
