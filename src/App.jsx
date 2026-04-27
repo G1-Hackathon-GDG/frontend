@@ -3,8 +3,11 @@ import Navbar from "./components/common/Navbar";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import HomePage from "./pages/HomePage";
 
-const Login = () => <div>Login</div>;
-const Driver = () => <div>Driver</div>;
+import LoginPage from "./pages/driver/LoginPage";
+import RegisterPage from "./pages/driver/RegisterPage";
+import DashboardPage from "./pages/driver/DashboardPage";
+import HistoryPage from "./pages/driver/HistoryPage";
+
 const Admin = () => <div>Admin</div>;
 const Station = () => <div>Station</div>;
 
@@ -12,19 +15,33 @@ function App() {
   return (
     <>
       <Navbar />
+
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
 
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+
+     
         <Route
           path="/driver/dashboard"
           element={
             <ProtectedRoute role="driver">
-              <Driver />
+              <DashboardPage />
             </ProtectedRoute>
           }
         />
 
+        <Route
+          path="/driver/history"
+          element={
+            <ProtectedRoute role="driver">
+              <HistoryPage />
+            </ProtectedRoute>
+          }
+        />
+
+        
         <Route
           path="/admin/dashboard"
           element={
@@ -34,6 +51,7 @@ function App() {
           }
         />
 
+      
         <Route
           path="/station/scanner"
           element={
