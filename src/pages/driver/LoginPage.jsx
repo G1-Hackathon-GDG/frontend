@@ -1,44 +1,29 @@
 import { useState } from "react";
-import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { setToken, setUser } = useAuth();
-  const navigate = useNavigate();
+  const handle = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleLogin = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
-
-      const { token, user } = res.data;
-
-      setToken(token);
-      setUser(user);
-
-      if (user.role === "driver") {
-        navigate("/driver/dashboard");
-      } else if (user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else if (user.role === "staff") {
-        navigate("/station/scanner");
-      } else {
-        navigate("/");
-      }
+      const user = await login(form.email, form.password, false);
+      if (user.role === "admin") navigate("/admin/dashboard");
+      else if (user.role === "staff") navigate("/station/scanner");
+      else navigate("/driver/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      setError(
+        err.response?.data?.message || "Login failed. Check your credentials.",
+      );
     } finally {
       setLoading(false);
     }
@@ -46,58 +31,59 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-
       <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border-t-4 border-blue-900">
-
-        <h2 className="text-2xl font-bold text-center text-blue-900 mb-2">
-          FuelPass Login
-        </h2>
-
-        <p className="text-center text-gray-500 mb-6">
-          Driver access portal
-        </p>
+        <div className="text-center mb-6">
+          <div className="text-4xl mb-2">⛽</div>
+          <h2 className="text-2xl font-bold text-blue-900">FuelPass</h2>
+          <p className="text-gray-500 text-sm mt-1">Driver access portal</p>
+        </div>
 
         {error && (
-          <div className="bg-red-100 text-red-600 p-2 rounded mb-4 text-sm text-center">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
-
+        <form onSubmit={submit} className="space-y-4">
           <div>
-            <label className="text-sm text-gray-600">Email</label>
+            <label className="block text-sm text-gray-600 mb-1">Email</label>
             <input
-              className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+              name="email"
               type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              value={form.email}
+              onChange={handle}
+              required
+              autoFocus
             />
           </div>
-
           <div>
-            <label className="text-sm text-gray-600">Password</label>
+            <label className="block text-sm text-gray-600 mb-1">Password</label>
             <input
-              className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+              name="password"
               type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              value={form.password}
+              onChange={handle}
+              required
             />
           </div>
-
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:opacity-50"
+            className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading && (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            )}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
-          Don’t have an account?{" "}
+        <p className="text-center text-sm text-gray-500 mt-5">
+          No account?{" "}
           <Link
             to="/register"
             className="text-blue-900 font-semibold hover:underline"
@@ -105,9 +91,11 @@ export default function LoginPage() {
             Register here
           </Link>
         </p>
-
-        <p className="text-center text-sm text-gray-400 mt-6">
-          Secure Fuel Distribution System
+        <p className="text-center text-xs text-gray-400 mt-3">
+          Admin or station staff?{" "}
+          <Link to="/admin/login" className="text-gray-500 hover:underline">
+            Sign in here
+          </Link>
         </p>
       </div>
     </div>

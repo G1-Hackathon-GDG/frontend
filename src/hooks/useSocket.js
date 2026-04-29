@@ -1,5 +1,1 @@
-import { useSocketContext } from "../context/SocketContext";
-
-export const useSocket = () => {
-  return useSocketContext();
-};
+export { useSocketContext as useSocket } from "../context/SocketContext";
