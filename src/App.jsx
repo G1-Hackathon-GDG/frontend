@@ -3,12 +3,12 @@ import { lazy, Suspense } from "react";
 import Navbar from "./components/common/Navbar";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import ErrorBoundary from "./components/common/ErrorBoundary";
-import { useAuth } from "./context/AuthContext";
 
 import LoginPage from "./pages/driver/LoginPage";
 import RegisterPage from "./pages/driver/RegisterPage";
 import DashboardPage from "./pages/driver/DashboardPage";
 import HistoryPage from "./pages/driver/HistoryPage";
+import HomePage from "./pages/HomePage";
 
 // Lazy load all other pages
 const AdminLoginPage = lazy(() => import("./pages/admin/AdminLoginPage"));
@@ -33,17 +33,6 @@ function Guarded({ roles, children }) {
   return <ProtectedRoute roles={roles}>{children}</ProtectedRoute>;
 }
 
-function RoleRedirect() {
-  const { user, loading } = useAuth();
-
-  if (loading) return <Loading />;
-  if (user?.role === "admin") return <Navigate to="/admin/dashboard" replace />;
-  if (user?.role === "staff") return <Navigate to="/station/scanner" replace />;
-  if (user?.role === "driver")
-    return <Navigate to="/driver/dashboard" replace />;
-  return <Navigate to="/login" replace />;
-}
-
 function App() {
   return (
     <ErrorBoundary>
@@ -51,7 +40,7 @@ function App() {
       <Suspense fallback={<Loading />}>
         <Routes>
           {/* Public */}
-          <Route path="/" element={<RoleRedirect />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />

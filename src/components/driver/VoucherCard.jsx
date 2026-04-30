@@ -25,6 +25,15 @@ const VoucherCard = ({ voucher }) => {
     qrToken && typeof window !== "undefined"
       ? `${window.location.origin}/station/verify/${qrToken}`
       : qrToken;
+  const terminalStatus = ["redeemed", "cancelled", "expired"].includes(
+    String(status).toLowerCase(),
+  );
+  const terminalLabel =
+    status === "redeemed"
+      ? "Redeemed"
+      : status === "cancelled"
+        ? "Cancelled"
+        : "Expired";
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden max-w-sm w-full mx-auto transition-all hover:shadow-md">
@@ -77,15 +86,33 @@ const VoucherCard = ({ voucher }) => {
         <div className="bg-white p-4 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center">
           {qrToken ? (
             <>
-              <div className="w-[200px] h-[200px] bg-white p-2 rounded-lg shadow-sm">
+              <div className="relative w-[200px] h-[200px] bg-white p-2 rounded-lg shadow-sm">
                 <QRCode
                   value={qrUrl}
                   size={200}
                   bgColor="#ffffff"
                   fgColor="#000000"
                   level="Q"
-                  style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                  style={{
+                    height: "auto",
+                    maxWidth: "100%",
+                    width: "100%",
+                    opacity: terminalStatus ? 0.18 : 1,
+                  }}
                 />
+                {terminalStatus && (
+                  <div className="absolute inset-2 flex items-center justify-center rounded-md bg-white/75">
+                    <div
+                      className={`rounded-full px-4 py-2 text-sm font-black uppercase tracking-wider ${
+                        status === "redeemed"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {terminalLabel}
+                    </div>
+                  </div>
+                )}
               </div>
               <p className="mt-3 text-[10px] font-mono text-gray-400 break-all text-center max-w-[200px]">
                 {qrToken}
