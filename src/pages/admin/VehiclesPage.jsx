@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { vehicleApi } from "../../api/vehicleApi";
 import {
   getTierBadgeStyle,
-  getTierLabel,
   getVehicleTypeLabel,
 } from "../../utils/tierLabel";
 
@@ -16,7 +15,8 @@ export default function VehiclesPage() {
     try {
       const { data } = await vehicleApi.getAll();
       setVehicles(data.vehicles || []);
-    } catch {
+    } catch (err) {
+      console.error("Failed to load vehicles", err);
     } finally {
       setLoading(false);
     }

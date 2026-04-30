@@ -5,6 +5,21 @@ import { useSocketContext } from "../../context/SocketContext";
 import { useState, useEffect } from "react";
 import axiosInstance from "../../api/axiosInstance";
 
+function normalizeStatusStats(byStatus) {
+  if (!byStatus) return [];
+
+  const entries = Array.isArray(byStatus)
+    ? byStatus.map((item) => [
+        item.status ?? item._id ?? item.name,
+        item.count ?? item.total ?? item.value,
+      ])
+    : Object.entries(byStatus);
+
+  return entries
+    .map(([status, count]) => [status, Number(count ?? 0)])
+    .filter(([status, count]) => status && status !== "total" && count > 0);
+}
+
 export default function AdminDashboardPage() {
   const { shortageAlert, clearShortageAlert } = useSocketContext();
   const [voucherStats, setVoucherStats] = useState(null);
@@ -14,17 +29,25 @@ export default function AdminDashboardPage() {
       try {
         const { data } = await axiosInstance.get("/vouchers/stats");
         setVoucherStats(data);
-      } catch {}
+      } catch (err) {
+        console.error("Failed to load voucher stats", err);
+      }
     };
     fetch();
   }, []);
+
+  const statusStats = normalizeStatusStats(voucherStats?.byStatus);
+  const statusTotal =
+    statusStats.reduce((sum, [, count]) => sum + count, 0) ||
+    Number(voucherStats?.total || 0) ||
+    1;
 
   return (
     <div className="min-h-screen bg-gray-100">
       {shortageAlert && shortageAlert.alertLevel !== "normal" && (
         <AlertBanner
           isOpen
-          onMessage={shortageAlert.message}
+          message={shortageAlert.message}
           alertLevel={shortageAlert.alertLevel}
           onClose={clearShortageAlert}
         />
@@ -50,9 +73,9 @@ export default function AdminDashboardPage() {
             <h2 className="font-bold text-gray-800 mb-4">
               Voucher Status Summary
             </h2>
-            {voucherStats?.byStatus ? (
+            {statusStats.length > 0 ? (
               <div className="space-y-3">
-                {Object.entries(voucherStats.byStatus).map(
+                {statusStats.map(
                   ([status, count]) => (
                     <div key={status} className="flex items-center gap-3">
                       <span className="text-sm text-gray-500 w-24 capitalize">
@@ -62,7 +85,7 @@ export default function AdminDashboardPage() {
                         <div
                           className={`h-3 rounded-full ${status === "redeemed" ? "bg-green-500" : status === "pending" ? "bg-blue-500" : status === "cancelled" ? "bg-red-500" : "bg-gray-400"}`}
                           style={{
-                            width: `${Math.min((count / (voucherStats.byStatus.total || 1)) * 100, 100)}%`,
+                            width: `${Math.min((count / statusTotal) * 100, 100)}%`,
                           }}
                         />
                       </div>

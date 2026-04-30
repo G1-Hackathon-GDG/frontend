@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { voucherApi } from "../../api/voucherApi";
 
 const STATUS_STYLE = {
@@ -17,7 +17,7 @@ export default function VouchersPage() {
   const [cancelId, setCancelId] = useState(null);
   const [cancelReason, setCancelReason] = useState("");
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const [vRes, sRes] = await Promise.all([
@@ -30,15 +30,16 @@ export default function VouchersPage() {
       ]);
       setData(vRes.data);
       setStats(sRes.data);
-    } catch {
+    } catch (err) {
+      console.error("Failed to load vouchers", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, statusFilter]);
 
   useEffect(() => {
     load();
-  }, [page, statusFilter]);
+  }, [load]);
 
   const cancel = async () => {
     if (!cancelId) return;

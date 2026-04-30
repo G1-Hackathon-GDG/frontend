@@ -1,8 +1,9 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function ProtectedRoute({ children, roles }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   // Still loading session — show nothing, don't redirect yet
   if (loading) {
@@ -15,11 +16,10 @@ export default function ProtectedRoute({ children, roles }) {
 
   // Not logged in
   if (!user) {
-    const loginPath =
-      roles?.includes("admin") || roles?.includes("staff")
-        ? "/admin/login"
-        : "/login";
-    return <Navigate to={loginPath} replace />;
+    let loginPath = "/login";
+    if (location.pathname.startsWith("/admin")) loginPath = "/admin/login";
+    if (location.pathname.startsWith("/station")) loginPath = "/station/login";
+    return <Navigate to={loginPath} replace state={{ from: location }} />;
   }
 
   // Wrong role

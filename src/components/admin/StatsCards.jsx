@@ -37,7 +37,9 @@ export default function StatsCards() {
       try {
         const { data } = await axiosInstance.get("/admin/stats");
         setStats(data);
-      } catch {}
+      } catch (err) {
+        console.error("Failed to load admin stats", err);
+      }
     };
     fetch();
     const interval = setInterval(fetch, 30000);

@@ -23,7 +23,7 @@ export default function QRScanner({ onScan, onError }) {
         () => {}, // ignore per-frame errors
       );
       setActive(true);
-    } catch (err) {
+    } catch {
       onError?.("Camera access denied or unavailable.");
     } finally {
       setStarting(false);
@@ -34,7 +34,9 @@ export default function QRScanner({ onScan, onError }) {
     if (scannerRef.current) {
       try {
         await scannerRef.current.stop();
-      } catch {}
+      } catch (err) {
+        console.error("Failed to stop QR scanner", err);
+      }
       scannerRef.current = null;
     }
     setActive(false);

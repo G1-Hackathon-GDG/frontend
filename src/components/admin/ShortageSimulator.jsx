@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { aiApi } from "../../api/aiApi";
-import { useSocketContext } from "../../context/SocketContext";
 
 export default function ShortageSimulator({ onResult }) {
   const [loading, setLoading] = useState(false);

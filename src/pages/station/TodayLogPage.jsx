@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
 import { stationApi } from "../../api/stationApi";
 
 export default function TodayLogPage() {
-  const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [station, setStation] = useState(null);
   const [loading, setLoading] = useState(true);

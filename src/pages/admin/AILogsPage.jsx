@@ -21,7 +21,8 @@ export default function AILogsPage() {
         const { data } = await aiApi.getLogs({ page, limit: 10 });
         setLogs(data.logs || []);
         setTotal(data.total || 0);
-      } catch {
+      } catch (err) {
+        console.error("Failed to load AI logs", err);
       } finally {
         setLoading(false);
       }

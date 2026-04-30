@@ -16,6 +16,38 @@ const ALERT_STYLE = {
   },
 };
 
+function formatValue(value) {
+  if (value == null || value === "") return "N/A";
+  if (typeof value === "string" || typeof value === "number") return value;
+  if (Array.isArray(value)) return value.join(", ");
+  return Object.entries(value)
+    .map(([key, val]) => `${key}: ${val}`)
+    .join(", ");
+}
+
+function normalizeTimeSlotPlan(plan) {
+  if (!plan) return [];
+  if (Array.isArray(plan)) return plan;
+  if (typeof plan === "object") {
+    return Object.entries(plan).map(([timeSlot, detail]) => ({
+      stationName: timeSlot,
+      slots: [{ timeSlot, detail }],
+    }));
+  }
+  return [];
+}
+
+function getTierCount(canServe, tier) {
+  const tierKeys = {
+    1: ["tier1", "Tier 1", "fuel_tanker", "manufacturing", "government_project"],
+    2: ["tier2", "Tier 2", "essential_goods", "agricultural_tractor"],
+    3: ["tier3", "Tier 3", "urban_public_transport", "diesel_public_transport"],
+    4: ["tier4", "Tier 4", "private"],
+  };
+
+  return tierKeys[tier].reduce((sum, key) => sum + Number(canServe[key] || 0), 0);
+}
+
 export default function AIResultPanel({ result }) {
   if (!result) return null;
 
@@ -23,6 +55,7 @@ export default function AIResultPanel({ result }) {
   if (!aiDecision) return null;
 
   const style = ALERT_STYLE[aiDecision.alertLevel] || ALERT_STYLE.normal;
+  const timeSlotPlan = normalizeTimeSlotPlan(aiDecision.timeSlotPlan);
 
   return (
     <div
@@ -71,7 +104,7 @@ export default function AIResultPanel({ result }) {
               Exhaustion Est.
             </p>
             <p className="text-2xl font-black text-blue-900 mt-1">
-              {aiDecision.fuelExhaustionTime || "N/A"}
+              {formatValue(aiDecision.fuelExhaustionTime)}
             </p>
           </div>
         </div>
@@ -98,7 +131,7 @@ export default function AIResultPanel({ result }) {
                 >
                   <p className="text-xs font-bold uppercase">Tier {t}</p>
                   <p className="text-xl font-black mt-1">
-                    {aiDecision.canServe[`tier${t}`] ?? 0}
+                    {getTierCount(aiDecision.canServe, t)}
                   </p>
                 </div>
               );
@@ -108,13 +141,13 @@ export default function AIResultPanel({ result }) {
       )}
 
       {/* Time slot plan */}
-      {aiDecision.timeSlotPlan?.length > 0 && (
+      {timeSlotPlan.length > 0 && (
         <div>
           <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
             Time Slot Plan
           </p>
           <div className="space-y-2">
-            {aiDecision.timeSlotPlan.map((station, i) => (
+            {timeSlotPlan.map((station, i) => (
               <div
                 key={i}
                 className="bg-white rounded-xl border border-gray-100 p-3"
@@ -128,7 +161,7 @@ export default function AIResultPanel({ result }) {
                       key={j}
                       className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-lg font-medium"
                     >
-                      {slot.timeSlot} · {slot.vehicles?.length || 0} vehicles
+                      {slot.detail || `${slot.timeSlot} · ${slot.vehicles?.length || 0} vehicles`}
                     </span>
                   ))}
                 </div>

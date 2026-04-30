@@ -2,6 +2,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import Navbar from "./components/common/Navbar";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import ErrorBoundary from "./components/common/ErrorBoundary";
+import { useAuth } from "./context/AuthContext";
 
 import LoginPage from "./pages/driver/LoginPage";
 import RegisterPage from "./pages/driver/RegisterPage";
@@ -31,14 +33,25 @@ function Guarded({ roles, children }) {
   return <ProtectedRoute roles={roles}>{children}</ProtectedRoute>;
 }
 
+function RoleRedirect() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <Loading />;
+  if (user?.role === "admin") return <Navigate to="/admin/dashboard" replace />;
+  if (user?.role === "staff") return <Navigate to="/station/scanner" replace />;
+  if (user?.role === "driver")
+    return <Navigate to="/driver/dashboard" replace />;
+  return <Navigate to="/login" replace />;
+}
+
 function App() {
   return (
-    <>
+    <ErrorBoundary>
       <Navbar />
       <Suspense fallback={<Loading />}>
         <Routes>
           {/* Public */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<RoleRedirect />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
@@ -142,7 +155,7 @@ function App() {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Suspense>
-    </>
+    </ErrorBoundary>
   );
 }
 

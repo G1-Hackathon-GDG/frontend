@@ -23,7 +23,8 @@ export default function CyclePage() {
       if (activeRes.status === "fulfilled")
         setActive(activeRes.value.data.cycle || activeRes.value.data);
       if (allRes.status === "fulfilled") setAll(allRes.value.data.cycles || []);
-    } catch {
+    } catch (err) {
+      console.error("Failed to load cycles", err);
     } finally {
       setLoading(false);
     }

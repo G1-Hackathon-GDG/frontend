@@ -10,7 +10,8 @@ export default function FraudAlertsTable() {
     try {
       const { data } = await vehicleApi.getAll();
       setFlagged((data.vehicles || []).filter((v) => v.flagged));
-    } catch {
+    } catch (err) {
+      console.error("Failed to load flagged vehicles", err);
     } finally {
       setLoading(false);
     }

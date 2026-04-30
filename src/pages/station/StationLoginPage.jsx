@@ -16,10 +16,13 @@ export default function StationLoginPage() {
     setError("");
     setLoading(true);
     try {
-      await login(form.email, form.password, true); // isAdmin=true → hits /auth/admin/login
+      const user = await login(form.email, form.password, false);
+      if (user.role !== "staff" && user.role !== "admin") {
+        throw new Error("This account does not have station access.");
+      }
       navigate("/station/scanner");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed.");
+      setError(err.response?.data?.message || err.message || "Login failed.");
     } finally {
       setLoading(false);
     }

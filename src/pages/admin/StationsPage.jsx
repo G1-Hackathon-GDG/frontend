@@ -21,7 +21,8 @@ export default function StationsPage() {
     try {
       const { data } = await stationApi.getAll();
       setStations(data.stations || []);
-    } catch {
+    } catch (err) {
+      console.error("Failed to load stations", err);
     } finally {
       setLoading(false);
     }

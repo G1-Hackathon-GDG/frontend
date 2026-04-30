@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
+import { useAuth } from "../../context/AuthContext";
 
 // Must match backend Vehicle model enum exactly
 const VEHICLE_TYPES = [
@@ -24,6 +25,7 @@ const VEHICLE_TYPES = [
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     name: "",
@@ -55,13 +57,11 @@ export default function RegisterPage() {
     setFraudFlags([]);
     setLoading(true);
     try {
-      // Step 1: register account
-      const { data: authData } = await axiosInstance.post("/auth/register", {
+      await register({
         name: form.name,
         email: form.email,
         password: form.password,
       });
-      window.__accessToken = authData.accessToken;
 
       // Step 2: register vehicle
       const { data: vehicleData } = await axiosInstance.post("/vehicles", {

@@ -15,10 +15,44 @@ const TIER_NAMES = [
   "Tier 4 — Private",
 ];
 
+function normalizeTierStats(byTier) {
+  if (Array.isArray(byTier)) {
+    return byTier
+      .map((t) => {
+        const tier = Number(t._id ?? t.tier ?? t.tierLevel);
+        return {
+          tier,
+          value: Number(t.count ?? t.total ?? t.value ?? 0),
+          redeemed: Number(t.redeemed ?? 0),
+        };
+      })
+      .filter((t) => t.tier >= 1 && t.tier <= 4 && t.value > 0);
+  }
+
+  if (byTier && typeof byTier === "object") {
+    return Object.entries(byTier)
+      .map(([key, value]) => {
+        const tier = Number(String(key).replace(/\D/g, ""));
+        const count =
+          value && typeof value === "object"
+            ? value.count ?? value.total ?? value.value
+            : value;
+        return {
+          tier,
+          value: Number(count ?? 0),
+          redeemed: Number(value?.redeemed ?? 0),
+        };
+      })
+      .filter((t) => t.tier >= 1 && t.tier <= 4 && t.value > 0);
+  }
+
+  return [];
+}
+
 export default function TierDonutChart({ byTier = [] }) {
-  const data = byTier.map((t) => ({
-    name: TIER_NAMES[t._id - 1] || `Tier ${t._id}`,
-    value: t.count,
+  const data = normalizeTierStats(byTier).map((t) => ({
+    name: TIER_NAMES[t.tier - 1] || `Tier ${t.tier}`,
+    value: t.value,
     redeemed: t.redeemed,
   }));
 
