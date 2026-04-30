@@ -50,19 +50,19 @@ export default function HomePage() {
 
         <div className="flex flex-col md:flex-row gap-4 justify-center">
           <Link
-            to="/login"
+            to="/driver/dashboard"
             className="bg-green-500 px-6 py-3 rounded-lg text-white font-semibold hover:bg-green-600 transition"
           >
             Driver Portal 🚗
           </Link>
           <Link
-            to="/login"
+            to="/station/scanner"
             className="bg-yellow-500 px-6 py-3 rounded-lg text-black font-semibold hover:bg-yellow-600 transition"
           >
             Station Portal ⛽
           </Link>
           <Link
-            to="/login"
+            to="/admin/dashboard"
             className="bg-red-500 px-6 py-3 rounded-lg text-white font-semibold hover:bg-red-600 transition"
           >
             Admin Panel 👑

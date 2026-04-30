@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -9,8 +9,16 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { setToken, setUser } = useAuth();
+  const { token, user, setToken, setUser } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (token && user) {
+      if (user.role === "driver") navigate("/driver/dashboard");
+      else if (user.role === "admin") navigate("/admin/dashboard");
+      else if (user.role === "staff") navigate("/station/scanner");
+    }
+  }, [token, user, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,20 +31,23 @@ export default function LoginPage() {
         password,
       });
 
-      const { token, user } = res.data;
+      const { accessToken, user } = res.data;
 
-      setToken(token);
+      setToken(accessToken);
       setUser(user);
 
-      if (user.role === "driver") {
-        navigate("/driver/dashboard");
-      } else if (user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else if (user.role === "staff") {
-        navigate("/station/scanner");
-      } else {
-        navigate("/");
-      }
+      // Small delay to ensure context updates process if any, but hard reload avoids stale state 
+      setTimeout(() => {
+        if (user.role === "driver") {
+          window.location.href = "/driver/dashboard";
+        } else if (user.role === "admin") {
+          window.location.href = "/admin/dashboard";
+        } else if (user.role === "staff") {
+          window.location.href = "/station/scanner";
+        } else {
+          window.location.href = "/";
+        }
+      }, 50);
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     } finally {

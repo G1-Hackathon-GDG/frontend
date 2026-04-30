@@ -8,8 +8,10 @@ import RegisterPage from "./pages/driver/RegisterPage";
 import DashboardPage from "./pages/driver/DashboardPage";
 import HistoryPage from "./pages/driver/HistoryPage";
 
+import ScannerPage from "./pages/station/ScannerPage";
+import TodayLogPage from "./pages/station/TodayLogPage";
+
 const Admin = () => <div>Admin</div>;
-const Station = () => <div>Station</div>;
 
 function App() {
   return (
@@ -19,10 +21,11 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
 
+        {/* Auth Routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
-     
+        {/* Driver Routes */}
         <Route
           path="/driver/dashboard"
           element={
@@ -41,7 +44,7 @@ function App() {
           }
         />
 
-        
+        {/* Admin Routes */}
         <Route
           path="/admin/dashboard"
           element={
@@ -51,12 +54,21 @@ function App() {
           }
         />
 
-      
+        {/* Station Staff Routes */}
         <Route
           path="/station/scanner"
           element={
             <ProtectedRoute role="staff">
-              <Station />
+              <ScannerPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/station/logs"
+          element={
+            <ProtectedRoute role="staff">
+              <TodayLogPage />
             </ProtectedRoute>
           }
         />
