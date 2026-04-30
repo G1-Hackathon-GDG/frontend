@@ -16,6 +16,9 @@ export default function StationsPage() {
   });
   const [fuelModal, setFuelModal] = useState(null);
   const [fuelInput, setFuelInput] = useState("");
+  const [fuelError, setFuelError] = useState("");
+  const [fuelSaving, setFuelSaving] = useState(false);
+  const [stationSaving, setStationSaving] = useState(false);
 
   const load = async () => {
     try {
@@ -34,25 +37,54 @@ export default function StationsPage() {
 
   const addStation = async (e) => {
     e.preventDefault();
-    await stationApi.create({
-      ...addForm,
-      currentFuelLiters: Number(addForm.currentFuelLiters),
-      dailyCapacity: Number(addForm.dailyCapacity),
-      slotsPerHour: Number(addForm.slotsPerHour),
-    });
-    setShowAdd(false);
-    load();
+    const current = Number(addForm.currentFuelLiters);
+    const capacity = Number(addForm.dailyCapacity);
+    if (current > capacity) return;
+
+    setStationSaving(true);
+    try {
+      await stationApi.create({
+        ...addForm,
+        currentFuelLiters: current,
+        dailyCapacity: capacity,
+        slotsPerHour: Number(addForm.slotsPerHour),
+      });
+      setShowAdd(false);
+      load();
+    } finally {
+      setStationSaving(false);
+    }
   };
 
   const updateFuel = async () => {
     if (!fuelModal) return;
-    await stationApi.updateFuel(fuelModal._id, {
-      operation: "increment",
-      liters: Number(fuelInput),
-    });
-    setFuelModal(null);
-    setFuelInput("");
-    load();
+    const liters = Number(fuelInput);
+    const current = Number(fuelModal.currentFuelLiters || 0);
+    const capacity = Number(fuelModal.dailyCapacity || 0);
+    const maxAdd = Math.max(capacity - current, 0);
+
+    setFuelError("");
+    if (!Number.isFinite(liters) || liters <= 0) {
+      setFuelError("Enter a positive fuel amount.");
+      return;
+    }
+    if (liters > maxAdd) {
+      setFuelError(`This station can only accept up to ${maxAdd.toLocaleString()}L.`);
+      return;
+    }
+
+    setFuelSaving(true);
+    try {
+      await stationApi.updateFuel(fuelModal._id, {
+        operation: "increment",
+        liters,
+      });
+      setFuelModal(null);
+      setFuelInput("");
+      load();
+    } finally {
+      setFuelSaving(false);
+    }
   };
 
   const toggle = async (id) => {
@@ -105,6 +137,12 @@ export default function StationsPage() {
                 />
               </div>
             ))}
+            {Number(addForm.currentFuelLiters) >
+              Number(addForm.dailyCapacity) && (
+              <p className="col-span-2 text-sm font-semibold text-red-600">
+                Initial fuel cannot be greater than daily capacity.
+              </p>
+            )}
             <div className="col-span-2 flex gap-3">
               <button
                 type="button"
@@ -115,9 +153,14 @@ export default function StationsPage() {
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2.5 rounded-xl bg-blue-900 text-white font-semibold hover:bg-blue-800 transition"
+                disabled={
+                  stationSaving ||
+                  Number(addForm.currentFuelLiters) >
+                    Number(addForm.dailyCapacity)
+                }
+                className="flex-1 py-2.5 rounded-xl bg-blue-900 text-white font-semibold hover:bg-blue-800 transition disabled:opacity-50"
               >
-                Create Station
+                {stationSaving ? "Creating..." : "Create Station"}
               </button>
             </div>
           </form>
@@ -146,6 +189,7 @@ export default function StationsPage() {
                       onClick={() => {
                         setFuelModal(s);
                         setFuelInput("");
+                        setFuelError("");
                       }}
                       className="text-xs px-3 py-1.5 bg-blue-100 text-blue-800 rounded-lg font-semibold hover:bg-blue-200 transition"
                     >
@@ -197,13 +241,28 @@ export default function StationsPage() {
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
             <h3 className="font-bold text-gray-900 mb-1">Update Fuel</h3>
             <p className="text-gray-500 text-sm mb-4">{fuelModal.name}</p>
+            <p className="text-xs text-gray-500 mb-2">
+              Current: {fuelModal.currentFuelLiters?.toLocaleString()}L /{" "}
+              {fuelModal.dailyCapacity?.toLocaleString()}L
+            </p>
             <input
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
               type="number"
+              min="1"
+              max={Math.max(
+                Number(fuelModal.dailyCapacity || 0) -
+                  Number(fuelModal.currentFuelLiters || 0),
+                0,
+              )}
               placeholder="Liters to add"
               value={fuelInput}
               onChange={(e) => setFuelInput(e.target.value)}
             />
+            {fuelError && (
+              <p className="mt-2 text-sm font-semibold text-red-600">
+                {fuelError}
+              </p>
+            )}
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => setFuelModal(null)}
@@ -213,9 +272,10 @@ export default function StationsPage() {
               </button>
               <button
                 onClick={updateFuel}
-                className="flex-1 py-2.5 rounded-lg bg-blue-900 text-white font-semibold hover:bg-blue-800 transition"
+                disabled={fuelSaving}
+                className="flex-1 py-2.5 rounded-lg bg-blue-900 text-white font-semibold hover:bg-blue-800 transition disabled:opacity-50"
               >
-                Add Fuel
+                {fuelSaving ? "Adding..." : "Add Fuel"}
               </button>
             </div>
           </div>
