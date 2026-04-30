@@ -1,24 +1,35 @@
-export const parseDate = value => {
-  if (value == null) return null;
-  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+export function formatDate(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
 
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-};
+export function formatDateTime(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
-export const formatDate = (value, options = {}) => {
-  const date = parseDate(value);
-  if (!date) return "";
+export function formatTimeSlot(slot) {
+  if (!slot) return "—";
+  return slot; // e.g. "09:00-10:00" — already formatted
+}
 
-  const { locale = "en-US", dateStyle = "medium", timeStyle } = options;
-
-  const formatOptions = {
-    dateStyle,
-    ...(timeStyle ? { timeStyle } : {}),
-  };
-
-  return new Intl.DateTimeFormat(locale, formatOptions).format(date);
-};
-
-export const formatDateTime = (value, options = {}) =>
-  formatDate(value, { ...options, dateStyle: "medium", timeStyle: "short" });
+export function timeAgo(iso) {
+  if (!iso) return "";
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
