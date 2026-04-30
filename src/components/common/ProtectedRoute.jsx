@@ -4,17 +4,16 @@ import { useAuth } from "../../context/AuthContext";
 export default function ProtectedRoute({ children, roles }) {
   const { user, loading } = useAuth();
 
+  // Still loading session — show nothing, don't redirect yet
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-blue-900 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-500 text-sm">Loading...</p>
-        </div>
+        <div className="w-10 h-10 border-4 border-blue-900 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
+  // Not logged in
   if (!user) {
     const loginPath =
       roles?.includes("admin") || roles?.includes("staff")
@@ -23,6 +22,7 @@ export default function ProtectedRoute({ children, roles }) {
     return <Navigate to={loginPath} replace />;
   }
 
+  // Wrong role
   if (roles && !roles.includes(user.role)) {
     if (user.role === "admin")
       return <Navigate to="/admin/dashboard" replace />;

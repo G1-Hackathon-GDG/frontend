@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 import { authApi } from "../api/authApi";
 
@@ -12,9 +13,12 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const rehydrated = useRef(false); // ← prevent double-run
 
-  // Rehydrate session on every page load via refresh cookie
   useEffect(() => {
+    if (rehydrated.current) return; // already ran once, stop
+    rehydrated.current = true;
+
     const rehydrate = async () => {
       try {
         const { data: refreshData } = await authApi.refresh();
@@ -29,7 +33,7 @@ export function AuthProvider({ children }) {
       }
     };
     rehydrate();
-  }, []);
+  }, []); // ← empty array, runs once only
 
   const login = useCallback(async (email, password, isAdmin = false) => {
     const fn = isAdmin ? authApi.adminLogin : authApi.login;
