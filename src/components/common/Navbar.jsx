@@ -9,7 +9,12 @@ export default function Navbar() {
       <h1>FuelPass</h1>
 
       <div className="space-x-4">
-        {!user && <Link to="/login">Login</Link>}
+        {!user && (
+          <>
+            <Link to="/login" className="hover:text-indigo-400">Driver Portal</Link>
+            <Link to="/station/login" className="hover:text-indigo-400">Station Portal</Link>
+          </>
+        )}
 
         {user?.role === "driver" && (
           <Link to="/driver/dashboard">Dashboard</Link>
