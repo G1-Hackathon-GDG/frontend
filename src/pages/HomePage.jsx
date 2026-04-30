@@ -1,9 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Spinner from "../components/common/Spinner"; //
+import Spinner from "../components/common/Spinner";
+import AlertBanner from "../components/common/AlertBanner";
+import VoucherCard from "../components/driver/VoucherCard";
+import StatusTracker from "../components/driver/StatusTracker";
 
 export default function HomePage() {
   const [isTesting, setIsTesting] = useState(false);
+
+  const [alert, setAlert] = useState({
+    show: false,
+    reason: "Some stupid reason",
+  });
+
+  const today = new Date().toISOString().slice(0, 10);
 
   // Simulates Task 5: AI Allocation Engine delay (approx 3 seconds)
   const handleTestSpinner = async () => {
@@ -11,6 +21,22 @@ export default function HomePage() {
     await new Promise(resolve => setTimeout(resolve, 3000));
     setIsTesting(false);
   };
+  //test task 3: alert component
+  const testAlert = () => {
+    setAlert({ show: true, reason: "Test alert triggered" });
+  };
+
+  const mockVoucher = {
+    stationName: "TotalEnergies - Addis Ababa",
+    validDate: today,
+    timeSlot: "08:00 AM - 10:00 AM",
+    fuelLiters: 40,
+    qrToken: "fuel-vouch-xyz-123",
+    tierLevel: "Tier 2", // Test different tiers to see color changes
+    status: "pending", // Use `pending` so the status tracker can derive active if validDate is today
+  };
+
+  // In your JSX
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -49,21 +75,33 @@ export default function HomePage() {
             DEBUG: Task 3 Spinner Test
           </p>
           <button
-            onClick={handleTestSpinner}
+            onDoubleClick={handleTestSpinner}
+            onClick={testAlert}
             disabled={isTesting}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition flex items-center justify-center gap-3 w-full"
+            className="bg-gray-800 text-white hover:bg-gray-600 px-4 py-2 rounded transition flex items-center justify-center gap-3 w-full"
           >
             {isTesting ? (
               <>
-                <Spinner size="sm" color="white" />
+                <Spinner size="sm" />
                 <span>Simulating AI...</span>
               </>
             ) : (
               "Test Loading State"
             )}
           </button>
+          <AlertBanner
+            isOpen={alert.show}
+            message={alert.reason}
+            onClose={() => setAlert({ ...alert, show: false })}
+          />
         </div>
         {/* end of spinner test */}
+        <div className="mt-12 p-4 border border-gray-700 rounded-lg max-w-xs mx-auto">
+          <p className="mt-5 text-center text-xs text-gray-500 max-w-[250px] p-6">
+            To be deleted. For render test purposes Only
+          </p>
+          <VoucherCard voucher={mockVoucher} />
+        </div>
       </section>
 
       {/* FEATURES */}
