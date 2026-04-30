@@ -3,6 +3,7 @@ import { Html5Qrcode } from "html5-qrcode";
 
 export default function QRScanner({ onScan, onError }) {
   const scannerRef = useRef(null);
+  const lastTokenRef = useRef("");
   const [active, setActive] = useState(false);
   const [starting, setStarting] = useState(false);
 
@@ -17,7 +18,9 @@ export default function QRScanner({ onScan, onError }) {
         (decodedText) => {
           // Extract token from URL or use raw value
           const parts = decodedText.split("/verify/");
-          const token = parts.length > 1 ? parts[1] : decodedText;
+          const token = (parts.length > 1 ? parts[1] : decodedText).trim();
+          if (!token || token === lastTokenRef.current) return;
+          lastTokenRef.current = token;
           onScan(token);
         },
         () => {}, // ignore per-frame errors
@@ -38,6 +41,7 @@ export default function QRScanner({ onScan, onError }) {
         console.error("Failed to stop QR scanner", err);
       }
       scannerRef.current = null;
+      lastTokenRef.current = "";
     }
     setActive(false);
   };

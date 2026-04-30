@@ -8,6 +8,21 @@ const STATUS_STYLE = {
   cancelled: "bg-red-100 text-red-700",
 };
 
+function normalizeStatusStats(byStatus) {
+  if (!byStatus) return [];
+
+  const entries = Array.isArray(byStatus)
+    ? byStatus.map((item) => [
+        item.status ?? item._id ?? item.name,
+        item.count ?? item.total ?? item.value,
+      ])
+    : Object.entries(byStatus);
+
+  return entries
+    .map(([status, count]) => [status, Number(count ?? 0)])
+    .filter(([status]) => status && status !== "total");
+}
+
 export default function VouchersPage() {
   const [data, setData] = useState({ vouchers: [], total: 0 });
   const [statusFilter, setStatus] = useState("");
@@ -50,15 +65,16 @@ export default function VouchersPage() {
   };
 
   const totalPages = Math.ceil((data.total || 0) / 15);
+  const statusStats = normalizeStatusStats(stats?.byStatus);
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Vouchers</h1>
-          {stats && (
+          {statusStats.length > 0 && (
             <div className="flex gap-4 mt-2 text-sm">
-              {Object.entries(stats.byStatus).map(([s, c]) => (
+              {statusStats.map(([s, c]) => (
                 <span
                   key={s}
                   className={`px-2.5 py-1 rounded-full font-semibold ${STATUS_STYLE[s] || "bg-gray-100 text-gray-500"}`}

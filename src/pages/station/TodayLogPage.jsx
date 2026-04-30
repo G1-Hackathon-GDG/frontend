@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { stationApi } from "../../api/stationApi";
 
 export default function TodayLogPage() {
+  const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [station, setStation] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -11,12 +13,13 @@ export default function TodayLogPage() {
     const fetch = async () => {
       setLoading(true);
       try {
+        const assignedStationId = user?.stationId?._id || user?.stationId;
+
         // Get stations to find this staff's station
         const { data: stationsData } = await stationApi.getAll();
         const stations = stationsData.stations || [];
-        // staff is assigned to one station via stationId in their user profile
-        // fallback: use first active station
-        const myStation = stations[0];
+        const myStation =
+          stations.find((s) => s._id === assignedStationId) || stations[0];
         if (!myStation) {
           setError("No station found.");
           return;
@@ -31,7 +34,7 @@ export default function TodayLogPage() {
       }
     };
     fetch();
-  }, []);
+  }, [user]);
 
   const totalDispensed = events
     .filter((e) => e.eventType === "voucher_redeem")

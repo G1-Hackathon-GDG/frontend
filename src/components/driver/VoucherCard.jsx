@@ -1,5 +1,7 @@
 import React from "react";
+import QRCode from "react-qr-code";
 import { getTierBadgeStyle } from "../../utils/tierLabel";
+import { formatDate } from "../../utils/formatDate";
 import StatusTracker from "./StatusTracker";
 
 /**
@@ -18,6 +20,11 @@ const VoucherCard = ({ voucher }) => {
     tierLevel = "Tier 4",
     status = "pending",
   } = voucher || {};
+
+  const qrUrl =
+    qrToken && typeof window !== "undefined"
+      ? `${window.location.origin}/station/verify/${qrToken}`
+      : qrToken;
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden max-w-sm w-full mx-auto transition-all hover:shadow-md">
@@ -41,7 +48,7 @@ const VoucherCard = ({ voucher }) => {
             <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
               Valid Date
             </p>
-            <p className="font-medium text-gray-800">{validDate}</p>
+            <p className="font-medium text-gray-800">{formatDate(validDate)}</p>
           </div>
           <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
             <p className="text-gray-500 text-[11px] uppercase tracking-wider mb-1 font-semibold">
@@ -71,7 +78,6 @@ const VoucherCard = ({ voucher }) => {
           {qrToken ? (
             <>
               <div className="w-[200px] h-[200px] bg-white p-2 rounded-lg shadow-sm">
-                {/* react 19 incompatability 
                 <QRCode
                   value={qrUrl}
                   size={200}
@@ -79,7 +85,7 @@ const VoucherCard = ({ voucher }) => {
                   fgColor="#000000"
                   level="Q"
                   style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                /> */}
+                />
               </div>
               <p className="mt-3 text-[10px] font-mono text-gray-400 break-all text-center max-w-[200px]">
                 {qrToken}
