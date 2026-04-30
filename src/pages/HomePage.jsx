@@ -2,8 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1542367592-8849eb950fd8?auto=format&fit=crop&w=1800&q=85";
-
+  "https://unsplash.com/photos/person-taking-a-photo-of-blue-and-white-gasoline-station-ZdzO5PgYObA";
 const roleLinks = [
   {
     title: "Driver Portal",
@@ -288,13 +287,21 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
             <p className="font-black text-white">FuelPass</p>
-            <p className="text-sm">Smart Fuel Allocation & Digital Voucher System</p>
+            <p className="text-sm">
+              Smart Fuel Allocation & Digital Voucher System
+            </p>
           </div>
           <div className="flex gap-3">
-            <Link to="/register" className="text-sm font-semibold hover:text-white">
+            <Link
+              to="/register"
+              className="text-sm font-semibold hover:text-white"
+            >
               Register
             </Link>
-            <Link to="/login" className="text-sm font-semibold hover:text-white">
+            <Link
+              to="/login"
+              className="text-sm font-semibold hover:text-white"
+            >
               Login
             </Link>
             <Link
