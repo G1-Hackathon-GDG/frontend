@@ -1,5 +1,5 @@
 import React from "react";
-import QRCode from "react-qr-code";
+import { QRCode } from "react-qr-code";
 import { getTierBadgeStyle } from "../../utils/tierLabel";
 import { formatDate } from "../../utils/formatDate";
 import StatusTracker from "./StatusTracker";

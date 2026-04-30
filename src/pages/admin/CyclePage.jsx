@@ -12,6 +12,7 @@ export default function CyclePage() {
     totalFuelAvailable: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [closingId, setClosingId] = useState(null);
   const [error, setError] = useState("");
 
   const load = async () => {
@@ -53,8 +54,15 @@ export default function CyclePage() {
   };
 
   const close = async (id) => {
-    await cycleApi.close(id);
-    load();
+    setClosingId(id);
+    try {
+      await cycleApi.close(id);
+      setActive(null);
+      setShowForm(true);
+      load();
+    } finally {
+      setClosingId(null);
+    }
   };
 
   return (
@@ -67,15 +75,20 @@ export default function CyclePage() {
             </h1>
             <p className="text-gray-500 mt-1">Manage fuel allocation cycles</p>
           </div>
-          {!active && (
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="px-4 py-2 bg-blue-900 text-white rounded-xl font-semibold hover:bg-blue-800 transition text-sm"
-            >
-              + New Cycle
-            </button>
-          )}
+          <button
+            onClick={() => setShowForm(!showForm)}
+            disabled={Boolean(active)}
+            title={active ? "Close the active cycle before creating a new one." : ""}
+            className="px-4 py-2 bg-blue-900 text-white rounded-xl font-semibold hover:bg-blue-800 transition text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            + New Cycle
+          </button>
         </div>
+        {active && (
+          <p className="-mt-4 mb-4 text-sm text-gray-500">
+            Close the active cycle before creating another one.
+          </p>
+        )}
 
         {/* Active cycle card */}
         {active && (
@@ -98,9 +111,10 @@ export default function CyclePage() {
               </div>
               <button
                 onClick={() => close(active._id)}
-                className="px-4 py-2 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition text-sm"
+                disabled={closingId === active._id}
+                className="px-4 py-2 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition text-sm disabled:opacity-50"
               >
-                Close Cycle
+                {closingId === active._id ? "Closing..." : "Close Cycle"}
               </button>
             </div>
           </div>
